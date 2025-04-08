@@ -4,6 +4,9 @@ from abc import ABC
 class AstNode(ABC):
     def __eq__(self, b):
         return _equiv(self, b)
+    
+    def __ne__(self, b):
+        return not self.__eq__(b)
 
 class Var(AstNode):
     def __init__(self, name: str):
@@ -59,17 +62,13 @@ class Iff(BinaryOperator):
     commutative = True
 
 def _equiv(a: AstNode, b: AstNode) -> bool:
-    if not (isinstance(a, type(b)) or isinstance(b, type(a))):
+    if not (isinstance(a, type(b))):
         return False
-        print("Type mismatch")
-    if isinstance(a, UnaryOperator):
-        return _equiv(a.child, b.child)
-    elif isinstance(a, BinaryOperator):
-        if a.commutative: # if a is com, it returns true in the crossed case, the non-com case is always checked
-            if (_equiv(a.lhs, b.rhs) and _equiv(a.rhs, b.lhs)):
-                return True
-        elif (_equiv(a.lhs, b.lhs) and _equiv(a.rhs, b.rhs)):
+    if isinstance(a, BinaryOperator):
+        if a.lhs == b.lhs and a.rhs == b.rhs:
             return True
-    elif isinstance(a, Var) and a.name == b.name: 
+        if a.commutative and a.rhs == b.lhs and a.lhs == b.rhs:
+            return True
+    if isinstance(a, Var) and a.name == b.name:
         return True
     return False
