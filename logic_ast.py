@@ -72,3 +72,20 @@ def _equiv(a: AstNode, b: AstNode) -> bool:
     if isinstance(a, Var) and a.name == b.name:
         return True
     return False
+
+def alpha_replace(name: str, replacement: AstNode, tree: AstNode) -> None:
+    print(tree)
+    tree_type = type(tree)
+    if isinstance(tree, Var) and tree.name == name:
+        return replacement
+    elif isinstance(tree, UnaryOperator):
+        return tree_type(alpha_replace(name, replacement, tree.child))
+    elif isinstance(tree, BinaryOperator):
+        return tree_type(alpha_replace(name, replacement, tree.lhs), alpha_replace(name, replacement, tree.rhs))
+    return tree
+
+
+a = Imp(Var("A"), Var("B"))
+b = alpha_replace("A", Imp(Var("x"), Var("y")), a)
+
+print(b)
