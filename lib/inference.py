@@ -47,6 +47,8 @@ def _try_find_valid_mapping( meta_expressions: List[AstNode], object_expressions
                 continue
             
             mapping = _harvest_terms(oexpr, mexpr)
+            if mapping is None:
+                continue
             testexpr = deepcopy(mexpr)
             testexpr = alpha_replace_all(mapping, testexpr)
             values.append(testexpr == oexpr)
