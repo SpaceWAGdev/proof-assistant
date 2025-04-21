@@ -1,5 +1,5 @@
-from enum import Enum
 from abc import ABC
+from typing import Dict
 
 class AstNode(ABC):
     def __eq__(self, b):
@@ -7,6 +7,7 @@ class AstNode(ABC):
     
     def __ne__(self, b):
         return not self.__eq__(b)
+    
 
 class Var(AstNode):
     def __init__(self, name: str):
@@ -19,20 +20,20 @@ class Var(AstNode):
 class Operator(AstNode):
     sym: str
 
-class UnaryOperator(AstNode):
+class UnaryOperator(Operator):
     def __init__(self, child: AstNode):
         self.child = child    
 
     def __str__(self):
-        return f'{self.sym}({self.child})'
+        return f'{self.sym}({str(self.child)})'
     child: AstNode
 
-class BinaryOperator(AstNode):
+class BinaryOperator(Operator):
     def __init__(self, lhs: AstNode, rhs: AstNode):
         self.lhs = lhs
         self.rhs = rhs
     def __str__(self):
-        return f'({self.lhs}){self.sym}({ self.rhs})'
+        return f'({str(self.lhs)}){self.sym}({ str(self.rhs)})'
 
     lhs: AstNode
     rhs: AstNode
@@ -73,8 +74,7 @@ def _equiv(a: AstNode, b: AstNode) -> bool:
         return True
     return False
 
-def alpha_replace(name: str, replacement: AstNode, tree: AstNode) -> None:
-    print(tree)
+def alpha_replace(name: str, replacement: AstNode, tree: AstNode) -> AstNode:
     tree_type = type(tree)
     if isinstance(tree, Var) and tree.name == name:
         return replacement
@@ -85,7 +85,7 @@ def alpha_replace(name: str, replacement: AstNode, tree: AstNode) -> None:
     return tree
 
 
-a = Imp(Var("A"), Var("B"))
-b = alpha_replace("A", Imp(Var("x"), Var("y")), a)
-
-print(b)
+def alpha_replace_all(mapping: Dict[str, AstNode], tree: AstNode) -> AstNode:
+    for m in mapping.items():
+        tree = alpha_replace(m[0], m.value, tree)
+    return tree
